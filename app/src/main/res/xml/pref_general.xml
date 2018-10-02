@@ -38,6 +38,9 @@
         app:is24HourMode="true" />
 
     <com.app.dr1009.chronodialogpreference.DateDialogPreference
+        android:defaultValue="2000.1.1"
         android:key="test2"
-        android:title="Date Test" />
+        android:title="Date Test"
+        app:maxDate="2020.1.1"
+        app:minDate="1970.1.1" />
 </PreferenceScreen>
