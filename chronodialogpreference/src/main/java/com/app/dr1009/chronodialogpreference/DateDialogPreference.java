@@ -22,10 +22,6 @@ public class DateDialogPreference extends DialogPreference {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
     @Override
     protected View onCreateDialogView() {
         mDatePicker = new DatePicker(getContext());

@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <SwitchPreference
         android:defaultValue="true"
@@ -33,7 +34,8 @@
     <com.app.dr1009.chronodialogpreference.TimeDialogPreference
         android:defaultValue="01:10"
         android:key="test1"
-        android:title="Time Test" />
+        android:title="Time Test"
+        app:is24HourMode="true" />
 
     <com.app.dr1009.chronodialogpreference.DateDialogPreference
         android:key="test2"

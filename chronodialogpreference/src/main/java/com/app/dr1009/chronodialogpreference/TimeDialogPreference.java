@@ -16,22 +16,16 @@ public class TimeDialogPreference extends DialogPreference {
     private int mHour = 0;
     private int mMinute = 0;
 
-    private boolean mIs24Hour = false;
-
-    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
+    private boolean mIs24Hour;
 
     public TimeDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
 
-    public TimeDialogPreference(Context context) {
-        super(context);
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                R.styleable.Dialog_Preference_TimePicker, 0, 0);
+        mIs24Hour = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_is24HourMode, false);
+
+        a.recycle();
     }
 
     @Override
