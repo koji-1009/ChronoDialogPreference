@@ -11,11 +11,13 @@ import android.widget.TimePicker;
 
 public class TimeDialogPreference extends DialogPreference {
 
+    private static final String DEFAULT_TIME = "00:00";
+
     private TimePicker mTimePicker;
     private int mHour = 0;
     private int mMinute = 0;
 
-    private boolean mIs24Hour;
+    private final boolean mIs24Hour;
 
     public TimeDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -91,7 +93,7 @@ public class TimeDialogPreference extends DialogPreference {
     @Override
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
         if (restorePersistedValue) {
-            setText(getPersistedString("00:00"));
+            setText(getPersistedString(DEFAULT_TIME));
         } else {
             setText((String) defaultValue);
         }

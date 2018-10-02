@@ -12,13 +12,15 @@ import java.util.Calendar;
 
 public class DateDialogPreference extends DialogPreference {
 
+    private static final String DEFAULT_DATE = "1970.1.1";
+
     private DatePicker mDatePicker;
     private int mYear;
     private int mMonth;
     private int mDayOfMonth;
 
-    private String mMaxDate;
-    private String mMinDate;
+    private final String mMaxDate;
+    private final String mMinDate;
 
     public DateDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -95,7 +97,7 @@ public class DateDialogPreference extends DialogPreference {
     @Override
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
         if (restorePersistedValue) {
-            setText(getPersistedString("1970.1.1"));
+            setText(getPersistedString(DEFAULT_DATE));
         } else {
             setText((String) defaultValue);
         }
