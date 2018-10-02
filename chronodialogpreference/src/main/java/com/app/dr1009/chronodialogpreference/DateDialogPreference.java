@@ -22,11 +22,23 @@ public class DateDialogPreference extends DialogPreference {
     private final String mMaxDate;
     private final String mMinDate;
 
+    public DateDialogPreference(Context context) {
+        this(context, null);
+    }
+
     public DateDialogPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, android.R.attr.dialogPreferenceStyle);
+    }
+
+    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.Dialog_Preference_DatePicker, 0, 0);
+                R.styleable.Dialog_Preference_DatePicker, defStyleAttr, defStyleRes);
         mMaxDate = a.getString(R.styleable.Dialog_Preference_DatePicker_maxDate);
         mMinDate = a.getString(R.styleable.Dialog_Preference_DatePicker_minDate);
         a.recycle();

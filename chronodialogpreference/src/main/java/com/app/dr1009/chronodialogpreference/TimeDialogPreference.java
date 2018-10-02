@@ -19,8 +19,20 @@ public class TimeDialogPreference extends DialogPreference {
 
     private final boolean mIs24Hour;
 
+    public TimeDialogPreference(Context context) {
+        this(context, null);
+    }
+
     public TimeDialogPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, android.R.attr.dialogPreferenceStyle);
+    }
+
+    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Dialog_Preference_TimePicker, 0, 0);
