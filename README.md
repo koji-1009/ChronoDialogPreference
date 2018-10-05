@@ -26,7 +26,7 @@ dependencies {
 
 ## How to use
 
-Add `TimeDIaloPreference` to your preference's xml. See demo app.
+Add `TimeDialogPreference` or `DateDialogPreference` to your preference's xml. See demo app.
 
 ```xml
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
@@ -36,14 +36,14 @@ Add `TimeDIaloPreference` to your preference's xml. See demo app.
         android:defaultValue="01:10"
         android:key="test1"
         android:title="Time Test"
-        app:is24HourMode="true" />
+        app:is24HourMode="true" /> // set 24 hour mode (not AM/PM)
 
     <com.app.dr1009.chronodialogpreference.DateDialogPreference
         android:defaultValue="2000.1.1"
         android:key="test2"
         android:title="Date Test"
-        app:maxDate="2020.1.1"
-        app:minDate="1970.1.1" />
+        app:maxDate="2020.1.1"     // set Max Date to select on Calendar
+        app:minDate="1970.1.1" />  // set Min Date to select on Calendar
 </PreferenceScreen>
 ```
 
