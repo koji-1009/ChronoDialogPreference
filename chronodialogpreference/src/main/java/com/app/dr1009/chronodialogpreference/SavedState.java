@@ -5,6 +5,16 @@ import android.os.Parcelable;
 import android.preference.Preference;
 
 class SavedState extends Preference.BaseSavedState {
+    public static final Creator<SavedState> CREATOR =
+            new Creator<SavedState>() {
+                public SavedState createFromParcel(Parcel in) {
+                    return new SavedState(in);
+                }
+
+                public SavedState[] newArray(int size) {
+                    return new SavedState[size];
+                }
+            };
     String text;
 
     SavedState(Parcel source) {
@@ -21,15 +31,4 @@ class SavedState extends Preference.BaseSavedState {
         super.writeToParcel(dest, flags);
         dest.writeString(text);
     }
-
-    public static final Creator<SavedState> CREATOR =
-            new Creator<SavedState>() {
-                public SavedState createFromParcel(Parcel in) {
-                    return new SavedState(in);
-                }
-
-                public SavedState[] newArray(int size) {
-                    return new SavedState[size];
-                }
-            };
 }

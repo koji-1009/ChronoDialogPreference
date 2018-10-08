@@ -2,99 +2,73 @@ package com.app.dr1009.chronodialogpreference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.os.Parcelable;
-import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.TimePicker;
+
+import androidx.annotation.NonNull;
+import androidx.preference.DialogPreference;
 
 public class TimeDialogPreference extends DialogPreference {
 
     private static final String DEFAULT_TIME = "00:00";
 
+    private final boolean mIs24Hour;
     private TimePicker mTimePicker;
     private int mHour = 0;
     private int mMinute = 0;
-
-    private final boolean mIs24Hour;
-
-    public TimeDialogPreference(Context context) {
-        this(context, null);
-    }
-
-    public TimeDialogPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.dialogPreferenceStyle);
-    }
-
-    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
 
     public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Dialog_Preference_TimePicker, 0, 0);
+
         mIs24Hour = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_is24HourMode, false);
 
         a.recycle();
     }
 
-    @Override
-    protected View onCreateDialogView() {
-        mTimePicker = new TimePicker(getContext());
-        mTimePicker.setIs24HourView(mIs24Hour);
-
-        return mTimePicker;
+    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
-    @Override
-    protected void onBindDialogView(View view) {
-        super.onBindDialogView(view);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mTimePicker.setHour(mHour);
-            mTimePicker.setMinute(mMinute);
-        } else {
-            mTimePicker.setCurrentHour(mHour);
-            mTimePicker.setCurrentMinute(mMinute);
-        }
+    public TimeDialogPreference(Context context, AttributeSet attrs) {
+        this(context, attrs, androidx.preference.R.attr.dialogPreferenceStyle);
     }
 
-    @Override
-    protected void onDialogClosed(boolean positiveResult) {
-        super.onDialogClosed(positiveResult);
-
-        if (positiveResult) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                mHour = mTimePicker.getHour();
-                mMinute = mTimePicker.getMinute();
-            } else {
-                mHour = mTimePicker.getCurrentHour();
-                mMinute = mTimePicker.getCurrentMinute();
-            }
-
-            setSummary(getSummary());
-            String text = getText();
-            if (callChangeListener(text)) {
-                persistString(text);
-                notifyChanged();
-            }
-        }
+    public TimeDialogPreference(Context context) {
+        this(context, null);
     }
 
     @Override
     public CharSequence getSummary() {
-        if (mIs24Hour) {
-            return String.format("%s:%s", mHour, mMinute);
-        } else {
-            if (mHour >= 12) {
-                return String.format("PM %s:%s", mHour - 12, mMinute);
-            } else {
-                return String.format("AM %s:%s", mHour, mMinute);
-            }
+        return ChronoUtil.get24TimeText(mIs24Hour, mHour, mMinute);
+    }
+
+    public boolean is24Hour() {
+        return mIs24Hour;
+    }
+
+    public String getText() {
+        return ChronoUtil.getTimeText(mHour, mMinute);
+    }
+
+    public void setText(@NonNull final String text) {
+        String[] divided = ChronoUtil.getTimeFromText(text);
+        mHour = Integer.parseInt(divided[0]);
+        mMinute = Integer.parseInt(divided[1]);
+
+        final boolean wasBlocking = shouldDisableDependents();
+
+        persistString(text);
+
+        final boolean isBlocking = shouldDisableDependents();
+        if (isBlocking != wasBlocking) {
+            notifyDependencyChange(isBlocking);
         }
+
+        setSummary(getSummary());
     }
 
     @Override
@@ -103,8 +77,8 @@ public class TimeDialogPreference extends DialogPreference {
     }
 
     @Override
-    protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
-        if (restorePersistedValue) {
+    protected void onSetInitialValue(Object defaultValue) {
+        if (defaultValue == null) {
             setText(getPersistedString(DEFAULT_TIME));
         } else {
             setText((String) defaultValue);
@@ -120,7 +94,7 @@ public class TimeDialogPreference extends DialogPreference {
         }
 
         final SavedState myState = new SavedState(superState);
-        myState.text = getText();
+        myState.text = ChronoUtil.getTimeText(mHour, mMinute);
         return myState;
     }
 
@@ -136,15 +110,4 @@ public class TimeDialogPreference extends DialogPreference {
         super.onRestoreInstanceState(myState.getSuperState());
         setText(myState.text);
     }
-
-    private String getText() {
-        return String.format("%s:%s", mHour, mMinute);
-    }
-
-    private void setText(String text) {
-        String[] divided = text.split(":");
-        mHour = Integer.parseInt(divided[0]);
-        mMinute = Integer.parseInt(divided[1]);
-    }
-
 }
