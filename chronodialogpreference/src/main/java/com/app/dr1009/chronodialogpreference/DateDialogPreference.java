@@ -3,97 +3,74 @@ package com.app.dr1009.chronodialogpreference;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcelable;
-import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.DatePicker;
 
-import java.util.Calendar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.preference.DialogPreference;
 
 public class DateDialogPreference extends DialogPreference {
 
     private static final String DEFAULT_DATE = "1970.1.1";
 
-    private DatePicker mDatePicker;
+    private final String mMaxDate;
+    private final String mMinDate;
     private int mYear;
     private int mMonth;
     private int mDayOfMonth;
-
-    private final String mMaxDate;
-    private final String mMinDate;
-
-    public DateDialogPreference(Context context) {
-        this(context, null);
-    }
-
-    public DateDialogPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, android.R.attr.dialogPreferenceStyle);
-    }
-
-    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
 
     public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Dialog_Preference_DatePicker, defStyleAttr, defStyleRes);
-        mMaxDate = a.getString(R.styleable.Dialog_Preference_DatePicker_maxDate);
+
         mMinDate = a.getString(R.styleable.Dialog_Preference_DatePicker_minDate);
+        mMaxDate = a.getString(R.styleable.Dialog_Preference_DatePicker_maxDate);
+
         a.recycle();
     }
 
-    @Override
-    protected View onCreateDialogView() {
-        mDatePicker = new DatePicker(getContext());
-
-        Calendar calendar = Calendar.getInstance();
-        if (mMaxDate != null) {
-            String[] divided = mMaxDate.split("\\.");
-            int year = Integer.parseInt(divided[0]);
-            int month = Integer.parseInt(divided[1]) - 1;
-            int dayOfMonth = Integer.parseInt(divided[2]);
-
-            calendar.set(year, month, dayOfMonth);
-            mDatePicker.setMaxDate(calendar.getTimeInMillis());
-        }
-        if (mMinDate != null) {
-            String[] divided = mMinDate.split("\\.");
-            int year = Integer.parseInt(divided[0]);
-            int month = Integer.parseInt(divided[1]) - 1;
-            int dayOfMonth = Integer.parseInt(divided[2]);
-
-            calendar.set(year, month, dayOfMonth);
-            mDatePicker.setMinDate(calendar.getTimeInMillis());
-        }
-
-        return mDatePicker;
+    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
-    @Override
-    protected void onBindDialogView(View view) {
-        super.onBindDialogView(view);
-
-        mDatePicker.updateDate(mYear, mMonth, mDayOfMonth);
+    public DateDialogPreference(Context context, AttributeSet attrs) {
+        this(context, attrs, androidx.preference.R.attr.dialogPreferenceStyle);
     }
 
-    @Override
-    protected void onDialogClosed(boolean positiveResult) {
-        super.onDialogClosed(positiveResult);
+    public DateDialogPreference(Context context) {
+        this(context, null);
+    }
 
-        if (positiveResult) {
-            mYear = mDatePicker.getYear();
-            mMonth = mDatePicker.getMonth();
-            mDayOfMonth = mDatePicker.getDayOfMonth();
+    public String getMinDate() {
+        return mMinDate;
+    }
 
-            setSummary(getSummary());
-            String text = getText();
-            if (callChangeListener(text)) {
-                persistString(text);
-                notifyChanged();
-            }
+    public String getMaxDate() {
+        return mMaxDate;
+    }
+
+    public String getText() {
+        return ChronoUtil.getDateText(mYear, mMonth + 1, mDayOfMonth);
+    }
+
+    public void setText(@NonNull final String text) {
+        String[] divided = ChronoUtil.getDateFromText(text);
+        mYear = Integer.parseInt(divided[0]);
+        mMonth = Integer.parseInt(divided[1]) - 1;
+        mDayOfMonth = Integer.parseInt(divided[2]);
+
+        final boolean wasBlocking = shouldDisableDependents();
+
+        persistString(text);
+
+        final boolean isBlocking = shouldDisableDependents();
+        if (isBlocking != wasBlocking) {
+            notifyDependencyChange(isBlocking);
         }
+
+        setSummary(getSummary());
     }
 
     @Override
@@ -107,8 +84,8 @@ public class DateDialogPreference extends DialogPreference {
     }
 
     @Override
-    protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
-        if (restorePersistedValue) {
+    protected void onSetInitialValue(@Nullable Object defaultValue) {
+        if (defaultValue == null) {
             setText(getPersistedString(DEFAULT_DATE));
         } else {
             setText((String) defaultValue);
@@ -139,16 +116,5 @@ public class DateDialogPreference extends DialogPreference {
         SavedState myState = (SavedState) state;
         super.onRestoreInstanceState(myState.getSuperState());
         setText(myState.text);
-    }
-
-    private String getText() {
-        return String.format("%s.%s.%s", mYear, mMonth + 1, mDayOfMonth);
-    }
-
-    private void setText(String text) {
-        String[] divided = text.split("\\.");
-        mYear = Integer.parseInt(divided[0]);
-        mMonth = Integer.parseInt(divided[1]) - 1;
-        mDayOfMonth = Integer.parseInt(divided[2]);
     }
 }
