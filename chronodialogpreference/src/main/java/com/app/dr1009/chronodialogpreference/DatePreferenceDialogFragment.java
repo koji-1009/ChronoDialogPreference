@@ -1,6 +1,7 @@
 package com.app.dr1009.chronodialogpreference;
 
-import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.widget.DatePicker;
 
@@ -8,6 +9,8 @@ import java.util.Calendar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.preference.DialogPreference;
 import androidx.preference.PreferenceDialogFragment;
 
 public class DatePreferenceDialogFragment extends PreferenceDialogFragment {
@@ -63,10 +66,19 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragment {
         }
     }
 
+    @NonNull
     @Override
-    protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
-        super.onPrepareDialogBuilder(builder);
-        builder.setView(mDatePicker);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Context context = getActivity();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        DialogPreference preference = getPreference();
+        builder.setTitle(preference.getDialogTitle())
+                .setPositiveButton(preference.getPositiveButtonText(), this)
+                .setNegativeButton(preference.getNegativeButtonText(), this)
+                .setView(mDatePicker);
+
+        return builder.create();
     }
 
     @Override
