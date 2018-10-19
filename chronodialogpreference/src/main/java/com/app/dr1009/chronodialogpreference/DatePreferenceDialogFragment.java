@@ -19,7 +19,7 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragment {
     private static final String ARG_MAX_DATE = "max_date";
     private static final String SAVE_STATE_DATE = "save_state_time";
 
-    private DatePicker mDatePicker;
+    protected DatePicker mDatePicker;
 
     public static DatePreferenceDialogFragment newInstance(@NonNull final String key,
                                                            @Nullable final String minDate,
