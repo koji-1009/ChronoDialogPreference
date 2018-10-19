@@ -23,7 +23,6 @@ public abstract class ChronoPreferenceFragment extends PreferenceFragment {
                     .newInstance(dialogPreference.getKey(), dialogPreference.getMinDate(), dialogPreference.getMaxDate());
         }
 
-
         if (f != null) {
             f.setTargetFragment(this, 0);
             f.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
