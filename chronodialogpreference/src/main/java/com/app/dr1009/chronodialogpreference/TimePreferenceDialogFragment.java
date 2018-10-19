@@ -16,7 +16,7 @@ public class TimePreferenceDialogFragment extends PreferenceDialogFragment {
     private static final String ARG_24_HOUR = "24_hour";
     private static final String SAVE_STATE_TIME = "save_state_time";
 
-    private TimePicker mTimePicker;
+    protected TimePicker mTimePicker;
 
     public static TimePreferenceDialogFragment newInstance(@NonNull final String key,
                                                            boolean is24HourMode) {
