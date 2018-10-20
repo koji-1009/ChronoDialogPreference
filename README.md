@@ -6,6 +6,8 @@ Time picker dialog preference and Date picker dialog preference.
 
 ## Gradle
 
+NOTE: 2.x only supports Jetpack. If you use appcompat 1.x which is almost stable is the way to go.
+
 Step1. Add it in your root build.gradle at the end of repositories:
 
 ```groovy
@@ -45,6 +47,16 @@ Add `TimeDialogPreference` or `DateDialogPreference` to your preference's xml. S
         app:maxDate="2020.1.1"     // set Max Date to select on Calendar
         app:minDate="1970.1.1" />  // set Min Date to select on Calendar
 </PreferenceScreen>
+```
+Then, extend 'ChronoPreferenceFragment' instead of 'PreferenceFragment'. 
+
+```
+class SettingsFragment : ChronoPreferenceFragment() {
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setPreferencesFromResource(R.xml.pref_chrono, rootKey)
+    }
+}
 ```
 
 ## License
