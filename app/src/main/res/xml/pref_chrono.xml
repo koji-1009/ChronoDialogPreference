@@ -2,15 +2,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.app.dr1009.chronodialogpreference.TimeDialogPreference
-        android:defaultValue="01:10"
-        android:key="test1"
+        android:defaultValue="21:10"
+        android:key="test_time"
         android:title="Time Test"
-        app:is24HourMode="true" />
+        app:customFormat="HH:mm"
+        app:force24HourModePicker="true"/>
 
     <com.app.dr1009.chronodialogpreference.DateDialogPreference
-        android:defaultValue="2000.1.1"
-        android:key="test2"
+        android:defaultValue="2015-3-2"
+        android:key="test_date"
         android:title="Date Test"
-        app:maxDate="2020.1.1"
-        app:minDate="1970.1.1" />
+        app:customFormat="dd.MM.yyyy"
+        app:maxDate="2020-1-3"
+        app:minDate="1970-1-4" />
 </PreferenceScreen>
