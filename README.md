@@ -38,14 +38,17 @@ Add `TimeDialogPreference` or `DateDialogPreference` to your preference's xml. S
         android:defaultValue="01:10"
         android:key="test1"
         android:title="Time Test"
-        app:is24HourMode="true" /> // set 24 hour mode (not AM/PM)
+        app:customFormat="HH-MM"       // (optional) custom SimpleDateFormat pattern instead of system default
+        app:force12HourMode="true"     // (optional) force 24 hour mode (not AM/PM) instead of system default
+        app:force24HourMode="false" /> // (optional) force 12 hour mode (AM/PM) instead of system default
 
     <com.app.dr1009.chronodialogpreference.DateDialogPreference
         android:defaultValue="2000.1.1"
         android:key="test2"
         android:title="Date Test"
-        app:maxDate="2020.1.1"     // set Max Date to select on Calendar
-        app:minDate="1970.1.1" />  // set Min Date to select on Calendar
+        app:customFormat="dd.MM.yyyy" // (optional) custom SimpleDateFormat pattern instead of system default
+        app:maxDate="2020-1-1"        // (optional) set Max Date to select on Calendar
+        app:minDate="1970-1-1" />     // (optional) set Min Date to select on Calendar
 </PreferenceScreen>
 ```
 Then, extend 'ChronoPreferenceFragment' instead of 'PreferenceFragment'. 
@@ -64,7 +67,7 @@ class SettingsFragment : ChronoPreferenceFragment() {
 ```
 MIT License
 
-Copyright (c) 2018 Koji Wakamiya
+Copyright (c) 2018-2019 Koji Wakamiya, Serhii Yolkin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
