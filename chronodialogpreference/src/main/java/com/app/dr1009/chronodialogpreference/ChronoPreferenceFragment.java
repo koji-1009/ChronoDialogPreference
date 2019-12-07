@@ -1,14 +1,12 @@
 package com.app.dr1009.chronodialogpreference;
 
-import android.app.DialogFragment;
-
+import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 
-public abstract class ChronoPreferenceFragment extends PreferenceFragment {
+public abstract class ChronoPreferenceFragment extends PreferenceFragmentCompat {
 
-    private static final String DIALOG_FRAGMENT_TAG =
-            "ChronoPreferenceFragment.DIALOG";
+    private static final String DIALOG_FRAGMENT_TAG = "ChronoPreferenceFragment.DIALOG";
 
     @Override
     public void onDisplayPreferenceDialog(Preference preference) {
@@ -16,11 +14,21 @@ public abstract class ChronoPreferenceFragment extends PreferenceFragment {
         if (preference instanceof TimeDialogPreference) {
             TimeDialogPreference dialogPreference = (TimeDialogPreference) preference;
             f = TimePreferenceDialogFragment
-                    .newInstance(dialogPreference.getKey(), dialogPreference.is24Hour());
+                .newInstance(
+                    dialogPreference.getKey(),
+                    dialogPreference.isForce12HourPicker(),
+                    dialogPreference.isForce24HourPicker(),
+                    dialogPreference.getCustomFormat()
+                );
         } else if (preference instanceof DateDialogPreference) {
             DateDialogPreference dialogPreference = (DateDialogPreference) preference;
             f = DatePreferenceDialogFragment
-                    .newInstance(dialogPreference.getKey(), dialogPreference.getMinDate(), dialogPreference.getMaxDate());
+                .newInstance(
+                    dialogPreference.getKey(),
+                    dialogPreference.getMinDate(),
+                    dialogPreference.getMaxDate(),
+                    dialogPreference.getCustomFormat()
+                );
         }
 
         if (f != null) {

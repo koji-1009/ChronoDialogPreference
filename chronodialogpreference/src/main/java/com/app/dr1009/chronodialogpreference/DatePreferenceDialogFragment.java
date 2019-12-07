@@ -5,31 +5,36 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.DatePicker;
 
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.DialogPreference;
-import androidx.preference.PreferenceDialogFragment;
+import androidx.preference.PreferenceDialogFragmentCompat;
 
-public class DatePreferenceDialogFragment extends PreferenceDialogFragment {
+public class DatePreferenceDialogFragment extends PreferenceDialogFragmentCompat {
 
     private static final String ARG_MIN_DATE = "min_date";
     private static final String ARG_MAX_DATE = "max_date";
+    private static final String ARG_CUSTOM_FORMAT = "custom_format";
     private static final String SAVE_STATE_DATE = "save_state_time";
 
     protected DatePicker mDatePicker;
 
     public static DatePreferenceDialogFragment newInstance(@NonNull final String key,
                                                            @Nullable final String minDate,
-                                                           @Nullable final String maxDate) {
+                                                           @Nullable final String maxDate,
+                                                           @Nullable final String customFormat) {
         final DatePreferenceDialogFragment
-                fragment = new DatePreferenceDialogFragment();
-        final Bundle b = new Bundle(3);
+            fragment = new DatePreferenceDialogFragment();
+        final Bundle b = new Bundle(4);
         b.putString(ARG_KEY, key);
         b.putString(ARG_MIN_DATE, minDate);
         b.putString(ARG_MAX_DATE, maxDate);
+        b.putString(ARG_CUSTOM_FORMAT, customFormat);
         fragment.setArguments(b);
         return fragment;
     }
@@ -43,26 +48,42 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragment {
 
         String text;
         if (savedInstanceState == null) {
-            text = getDateDialogPreference().getText();
+            text = getDateDialogPreference().getSerializedValue();
         } else {
             text = savedInstanceState.getString(SAVE_STATE_DATE);
         }
 
         mDatePicker = new DatePicker(getActivity());
+        final Calendar calendar;
+        try {
+            calendar = ChronoUtil.dateToCalendar(ChronoUtil.DATE_FORMATTER.parse(text));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
-        String[] divided = ChronoUtil.getDateFromText(text);
-        int year = Integer.parseInt(divided[0]);
-        int month = Integer.parseInt(divided[1]) - 1;
-        int dayOfMonth = Integer.parseInt(divided[2]);
-        mDatePicker.updateDate(year, month, dayOfMonth);
+        mDatePicker.updateDate(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        );
 
         if (minDate != null) {
-            Calendar calender = ChronoUtil.getCalenderFromText(minDate);
-            mDatePicker.setMinDate(calender.getTimeInMillis());
+            Date date;
+            try {
+                date = ChronoUtil.DATE_FORMATTER.parse(minDate);
+            } catch (ParseException e) {
+                throw new IllegalArgumentException("minDate is not in the correct format", e);
+            }
+            mDatePicker.setMinDate(date.getTime());
         }
         if (maxDate != null) {
-            Calendar calender = ChronoUtil.getCalenderFromText(maxDate);
-            mDatePicker.setMaxDate(calender.getTimeInMillis());
+            Date date;
+            try {
+                date = ChronoUtil.DATE_FORMATTER.parse(maxDate);
+            } catch (ParseException e) {
+                throw new IllegalArgumentException("maxDate is not in the correct format", e);
+            }
+            mDatePicker.setMaxDate(date.getTime());
         }
     }
 
@@ -74,9 +95,9 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragment {
 
         DialogPreference preference = getPreference();
         builder.setTitle(preference.getDialogTitle())
-                .setPositiveButton(preference.getPositiveButtonText(), this)
-                .setNegativeButton(preference.getNegativeButtonText(), this)
-                .setView(mDatePicker);
+            .setPositiveButton(preference.getPositiveButtonText(), this)
+            .setNegativeButton(preference.getNegativeButtonText(), this)
+            .setView(mDatePicker);
 
         return builder.create();
     }
@@ -84,8 +105,10 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(SAVE_STATE_DATE,
-                ChronoUtil.getDateText(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth()));
+
+        outState.putString(
+            SAVE_STATE_DATE,
+            ChronoUtil.DATE_FORMATTER.format(getCalendarFromDatePicker().getTime()));
     }
 
     private DateDialogPreference getDateDialogPreference() {
@@ -95,10 +118,19 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragment {
     @Override
     public void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
-            String value = ChronoUtil.getDateText(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
+            String value = ChronoUtil.DATE_FORMATTER.format(getCalendarFromDatePicker().getTime());
             if (getDateDialogPreference().callChangeListener(value)) {
-                getDateDialogPreference().setText(value);
+                getDateDialogPreference().setSerializedValue(value);
             }
         }
     }
+
+    private Calendar getCalendarFromDatePicker() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, mDatePicker.getYear());
+        calendar.set(Calendar.MONTH, mDatePicker.getMonth());
+        calendar.set(Calendar.DAY_OF_MONTH, mDatePicker.getDayOfMonth());
+        return calendar;
+    }
+
 }
