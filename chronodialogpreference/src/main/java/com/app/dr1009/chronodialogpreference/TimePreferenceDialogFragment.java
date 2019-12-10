@@ -1,10 +1,9 @@
 package com.app.dr1009.chronodialogpreference;
 
-import android.app.Dialog;
-import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.view.View;
 import android.widget.TimePicker;
 
 import java.text.ParseException;
@@ -12,11 +11,8 @@ import java.util.Calendar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.preference.DialogPreference;
-import androidx.preference.PreferenceDialogFragmentCompat;
 
-public class TimePreferenceDialogFragment extends PreferenceDialogFragmentCompat {
+public class TimePreferenceDialogFragment extends ChronoPreferenceDialogFragmentCompat {
     private static final String ARG_FORCE_12_HOUR_PICKER = "force_12_hour_picker";
     private static final String ARG_FORCE_24_HOUR_PICKER = "force_24_hour_picker";
     private static final String ARG_CUSTOM_FORMAT = "custom_format";
@@ -77,30 +73,10 @@ public class TimePreferenceDialogFragment extends PreferenceDialogFragmentCompat
         int hour = parsed.get(Calendar.HOUR_OF_DAY);
         int minute = parsed.get(Calendar.MINUTE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mTimePicker.setHour(hour);
-            mTimePicker.setMinute(minute);
-        } else {
-            mTimePicker.setCurrentHour(hour);
-            mTimePicker.setCurrentMinute(minute);
-        }
+        setHourAndMinute(hour, minute);
     }
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Context context = getActivity();
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        DialogPreference preference = getPreference();
-        builder.setTitle(preference.getDialogTitle())
-                .setPositiveButton(preference.getPositiveButtonText(), this)
-                .setNegativeButton(preference.getNegativeButtonText(), this)
-                .setView(mTimePicker);
-
-        return builder.create();
-    }
-
+    @SuppressWarnings("deprecation")
     @Override
     public void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
@@ -120,6 +96,21 @@ public class TimePreferenceDialogFragment extends PreferenceDialogFragmentCompat
                 getTimeDialogPreference().setSerializedValue(value);
             }
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void setHourAndMinute(int hour, int minute) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mTimePicker.setHour(hour);
+            mTimePicker.setMinute(minute);
+        } else {
+            mTimePicker.setCurrentHour(hour);
+            mTimePicker.setCurrentMinute(minute);
+        }
+    }
+
+    View getPickerView() {
+        return mTimePicker;
     }
 
     private TimeDialogPreference getTimeDialogPreference() {

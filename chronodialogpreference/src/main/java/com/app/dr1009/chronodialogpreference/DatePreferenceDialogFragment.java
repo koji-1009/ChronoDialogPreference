@@ -1,8 +1,7 @@
 package com.app.dr1009.chronodialogpreference;
 
-import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.DatePicker;
 
 import java.text.ParseException;
@@ -11,11 +10,8 @@ import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.preference.DialogPreference;
-import androidx.preference.PreferenceDialogFragmentCompat;
 
-public class DatePreferenceDialogFragment extends PreferenceDialogFragmentCompat {
+public class DatePreferenceDialogFragment extends ChronoPreferenceDialogFragmentCompat {
 
     private static final String ARG_MIN_DATE = "min_date";
     private static final String ARG_MAX_DATE = "max_date";
@@ -87,21 +83,6 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragmentCompat
         }
     }
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Context context = getActivity();
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        DialogPreference preference = getPreference();
-        builder.setTitle(preference.getDialogTitle())
-            .setPositiveButton(preference.getPositiveButtonText(), this)
-            .setNegativeButton(preference.getNegativeButtonText(), this)
-            .setView(mDatePicker);
-
-        return builder.create();
-    }
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -109,10 +90,6 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragmentCompat
         outState.putString(
             SAVE_STATE_DATE,
             ChronoUtil.DATE_FORMATTER.format(getCalendarFromDatePicker().getTime()));
-    }
-
-    private DateDialogPreference getDateDialogPreference() {
-        return (DateDialogPreference) getPreference();
     }
 
     @Override
@@ -123,6 +100,14 @@ public class DatePreferenceDialogFragment extends PreferenceDialogFragmentCompat
                 getDateDialogPreference().setSerializedValue(value);
             }
         }
+    }
+
+    View getPickerView() {
+        return mDatePicker;
+    }
+
+    private DateDialogPreference getDateDialogPreference() {
+        return (DateDialogPreference) getPreference();
     }
 
     private Calendar getCalendarFromDatePicker() {
