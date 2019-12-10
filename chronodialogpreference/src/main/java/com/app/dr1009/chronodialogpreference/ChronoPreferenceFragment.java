@@ -6,14 +6,14 @@ import androidx.preference.PreferenceFragmentCompat;
 
 public abstract class ChronoPreferenceFragment extends PreferenceFragmentCompat {
 
-    private static final String DIALOG_FRAGMENT_TAG = "ChronoPreferenceFragment.DIALOG";
+    public static final String DIALOG_FRAGMENT_TAG = "ChronoPreferenceFragment.DIALOG";
 
     @Override
     public void onDisplayPreferenceDialog(Preference preference) {
-        DialogFragment f = null;
+        DialogFragment dialogFragment = null;
         if (preference instanceof TimeDialogPreference) {
             TimeDialogPreference dialogPreference = (TimeDialogPreference) preference;
-            f = TimePreferenceDialogFragment
+            dialogFragment = TimePreferenceDialogFragment
                 .newInstance(
                     dialogPreference.getKey(),
                     dialogPreference.isForce12HourPicker(),
@@ -22,7 +22,7 @@ public abstract class ChronoPreferenceFragment extends PreferenceFragmentCompat 
                 );
         } else if (preference instanceof DateDialogPreference) {
             DateDialogPreference dialogPreference = (DateDialogPreference) preference;
-            f = DatePreferenceDialogFragment
+            dialogFragment = DatePreferenceDialogFragment
                 .newInstance(
                     dialogPreference.getKey(),
                     dialogPreference.getMinDate(),
@@ -31,9 +31,9 @@ public abstract class ChronoPreferenceFragment extends PreferenceFragmentCompat 
                 );
         }
 
-        if (f != null) {
-            f.setTargetFragment(this, 0);
-            f.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+        if (dialogFragment != null) {
+            dialogFragment.setTargetFragment(this, 0);
+            dialogFragment.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
         } else {
             super.onDisplayPreferenceDialog(preference);
         }
