@@ -39,8 +39,8 @@ Add `TimeDialogPreference` or `DateDialogPreference` to your preference's xml. S
         android:key="test1"
         android:title="Time Test"
         app:customFormat="HH-MM"       // (optional) custom SimpleDateFormat pattern instead of system default
-        app:force12HourMode="true"     // (optional) force 24 hour mode (not AM/PM) instead of system default
-        app:force24HourMode="false" /> // (optional) force 12 hour mode (AM/PM) instead of system default
+        app:force12HourMode="true"     // (optional) force 12 hour mode (AM/PM) instead of system default
+        app:force24HourMode="false" /> // (optional) force 24 hour mode (not AM/PM) instead of system default
 
     <com.app.dr1009.chronodialogpreference.DateDialogPreference
         android:defaultValue="2000.1.1"
