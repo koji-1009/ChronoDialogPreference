@@ -8,9 +8,7 @@ import android.text.format.DateFormat;
 import android.widget.TimePicker;
 
 import java.text.ParseException;
-import java.time.LocalTime;
 import java.util.Calendar;
-import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

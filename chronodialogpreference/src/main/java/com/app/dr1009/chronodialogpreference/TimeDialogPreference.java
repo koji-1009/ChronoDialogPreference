@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.os.Parcelable;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.widget.TimePicker;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
