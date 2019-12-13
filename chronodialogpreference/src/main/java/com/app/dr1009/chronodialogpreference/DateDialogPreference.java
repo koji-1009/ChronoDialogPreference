@@ -78,7 +78,7 @@ public class DateDialogPreference extends DialogPreference {
         try {
             mCalendar = ChronoUtil.dateToCalendar(ChronoUtil.DATE_FORMATTER.parse(serializedDate));
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new AssertionError("Date format is always known and parsable", e);
         }
 
         final boolean wasBlocking = shouldDisableDependents();

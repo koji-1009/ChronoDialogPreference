@@ -54,7 +54,7 @@ public class DatePreferenceDialogFragment extends ChronoPreferenceDialogFragment
         try {
             calendar = ChronoUtil.dateToCalendar(ChronoUtil.DATE_FORMATTER.parse(text));
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new AssertionError("Date format is always known and parsable", e);
         }
 
         mDatePicker.updateDate(

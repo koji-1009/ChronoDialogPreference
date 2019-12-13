@@ -67,7 +67,7 @@ public class TimePreferenceDialogFragment extends ChronoPreferenceDialogFragment
         try {
             parsed = ChronoUtil.dateToCalendar(ChronoUtil.TIME_FORMATTER.parse(text));
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new AssertionError("Time format is always known and parsable", e);
         }
 
         int hour = parsed.get(Calendar.HOUR_OF_DAY);
