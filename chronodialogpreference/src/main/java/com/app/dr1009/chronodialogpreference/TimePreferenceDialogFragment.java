@@ -109,6 +109,7 @@ public class TimePreferenceDialogFragment extends ChronoPreferenceDialogFragment
         }
     }
 
+    @Override
     View getPickerView() {
         return mTimePicker;
     }

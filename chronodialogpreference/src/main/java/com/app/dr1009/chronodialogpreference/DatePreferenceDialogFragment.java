@@ -20,10 +20,12 @@ public class DatePreferenceDialogFragment extends ChronoPreferenceDialogFragment
 
     protected DatePicker mDatePicker;
 
-    public static DatePreferenceDialogFragment newInstance(@NonNull final String key,
-                                                           @Nullable final String minDate,
-                                                           @Nullable final String maxDate,
-                                                           @Nullable final String customFormat) {
+    public static DatePreferenceDialogFragment newInstance(
+        @NonNull final String key,
+        @Nullable final String minDate,
+        @Nullable final String maxDate,
+        @Nullable final String customFormat
+    ) {
         final DatePreferenceDialogFragment
             fragment = new DatePreferenceDialogFragment();
         final Bundle b = new Bundle(4);
@@ -102,6 +104,7 @@ public class DatePreferenceDialogFragment extends ChronoPreferenceDialogFragment
         }
     }
 
+    @Override
     View getPickerView() {
         return mDatePicker;
     }
