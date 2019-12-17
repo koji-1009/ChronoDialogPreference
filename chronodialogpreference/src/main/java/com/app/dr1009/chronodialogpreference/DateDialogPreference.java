@@ -3,21 +3,26 @@ package com.app.dr1009.chronodialogpreference;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcelable;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
 public class DateDialogPreference extends DialogPreference {
-
-    private static final String DEFAULT_DATE = "1970.1.1";
+    private static final String DEFAULT_DATE = "1970-1-1";
 
     private final String mMaxDate;
     private final String mMinDate;
-    private int mYear;
-    private int mMonth;
-    private int mDayOfMonth;
+    private final String mCustomFormat;
+    private final SimpleDateFormat mCustomSimpleDateFormat;
+    private Calendar mCalendar = Calendar.getInstance();
 
     public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -27,6 +32,12 @@ public class DateDialogPreference extends DialogPreference {
 
         mMinDate = a.getString(R.styleable.Dialog_Preference_DatePicker_minDate);
         mMaxDate = a.getString(R.styleable.Dialog_Preference_DatePicker_maxDate);
+        mCustomFormat = a.getString(R.styleable.Dialog_Preference_DatePicker_customFormat);
+        if (mCustomFormat != null && !mCustomFormat.isEmpty()) {
+            mCustomSimpleDateFormat = new SimpleDateFormat(mCustomFormat, Locale.getDefault());
+        } else {
+            mCustomSimpleDateFormat = null;
+        }
 
         a.recycle();
     }
@@ -43,6 +54,10 @@ public class DateDialogPreference extends DialogPreference {
         this(context, null);
     }
 
+    public Calendar getDate() {
+        return mCalendar;
+    }
+
     public String getMinDate() {
         return mMinDate;
     }
@@ -51,19 +66,24 @@ public class DateDialogPreference extends DialogPreference {
         return mMaxDate;
     }
 
-    public String getText() {
-        return ChronoUtil.getDateText(mYear, mMonth + 1, mDayOfMonth);
+    public String getCustomFormat() {
+        return mCustomFormat;
     }
 
-    public void setText(@NonNull final String text) {
-        String[] divided = ChronoUtil.getDateFromText(text);
-        mYear = Integer.parseInt(divided[0]);
-        mMonth = Integer.parseInt(divided[1]) - 1;
-        mDayOfMonth = Integer.parseInt(divided[2]);
+    public String getSerializedValue() {
+        return ChronoUtil.DATE_FORMATTER.format(getDate().getTime());
+    }
+
+    public void setSerializedValue(@NonNull final String serializedDate) {
+        try {
+            mCalendar = ChronoUtil.dateToCalendar(ChronoUtil.DATE_FORMATTER.parse(serializedDate));
+        } catch (ParseException e) {
+            throw new AssertionError("Date format is always known and parsable", e);
+        }
 
         final boolean wasBlocking = shouldDisableDependents();
 
-        persistString(text);
+        persistString(serializedDate);
 
         final boolean isBlocking = shouldDisableDependents();
         if (isBlocking != wasBlocking) {
@@ -75,7 +95,10 @@ public class DateDialogPreference extends DialogPreference {
 
     @Override
     public CharSequence getSummary() {
-        return getText();
+        if (mCustomSimpleDateFormat != null)
+            return mCustomSimpleDateFormat.format(getDate().getTime());
+
+        return DateUtils.formatDateTime(getContext(), getDate().getTimeInMillis(), DateUtils.FORMAT_SHOW_DATE);
     }
 
     @Override
@@ -86,9 +109,9 @@ public class DateDialogPreference extends DialogPreference {
     @Override
     protected void onSetInitialValue(@Nullable Object defaultValue) {
         if (defaultValue == null) {
-            setText(getPersistedString(DEFAULT_DATE));
+            setSerializedValue(getPersistedString(DEFAULT_DATE));
         } else {
-            setText((String) defaultValue);
+            setSerializedValue((String) defaultValue);
         }
     }
 
@@ -101,7 +124,7 @@ public class DateDialogPreference extends DialogPreference {
         }
 
         final SavedState myState = new SavedState(superState);
-        myState.text = getText();
+        myState.text = getSerializedValue();
         return myState;
     }
 
@@ -115,6 +138,6 @@ public class DateDialogPreference extends DialogPreference {
 
         SavedState myState = (SavedState) state;
         super.onRestoreInstanceState(myState.getSuperState());
-        setText(myState.text);
+        setSerializedValue(myState.text);
     }
 }

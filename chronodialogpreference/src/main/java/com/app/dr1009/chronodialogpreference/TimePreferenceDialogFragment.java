@@ -1,29 +1,37 @@
 package com.app.dr1009.chronodialogpreference;
 
-import android.app.Dialog;
-import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.view.View;
 import android.widget.TimePicker;
 
+import java.text.ParseException;
+import java.util.Calendar;
+
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.preference.DialogPreference;
-import androidx.preference.PreferenceDialogFragment;
+import androidx.annotation.Nullable;
 
-public class TimePreferenceDialogFragment extends PreferenceDialogFragment {
-
-    private static final String ARG_24_HOUR = "24_hour";
+public class TimePreferenceDialogFragment extends ChronoPreferenceDialogFragmentCompat {
+    private static final String ARG_FORCE_12_HOUR_PICKER = "force_12_hour_picker";
+    private static final String ARG_FORCE_24_HOUR_PICKER = "force_24_hour_picker";
+    private static final String ARG_CUSTOM_FORMAT = "custom_format";
     private static final String SAVE_STATE_TIME = "save_state_time";
 
     protected TimePicker mTimePicker;
 
-    public static TimePreferenceDialogFragment newInstance(@NonNull final String key,
-                                                           boolean is24HourMode) {
+    public static TimePreferenceDialogFragment newInstance(
+        @NonNull final String key,
+        final boolean force12HourPicker,
+        final boolean force24HourPicker,
+        @Nullable final String customFormat
+    ) {
         final TimePreferenceDialogFragment fragment = new TimePreferenceDialogFragment();
-        final Bundle b = new Bundle(2);
+        final Bundle b = new Bundle(4);
         b.putString(ARG_KEY, key);
-        b.putBoolean(ARG_24_HOUR, is24HourMode);
+        b.putBoolean(ARG_FORCE_12_HOUR_PICKER, force12HourPicker);
+        b.putBoolean(ARG_FORCE_24_HOUR_PICKER, force24HourPicker);
+        b.putString(ARG_CUSTOM_FORMAT, customFormat);
         fragment.setArguments(b);
         return fragment;
     }
@@ -34,19 +42,64 @@ public class TimePreferenceDialogFragment extends PreferenceDialogFragment {
 
         String text;
         if (savedInstanceState == null) {
-            text = getTimeDialogPreference().getText();
+            text = getTimeDialogPreference().getSerializedValue();
         } else {
             text = savedInstanceState.getString(SAVE_STATE_TIME);
         }
-        boolean is24Hour = getArguments().getBoolean(ARG_24_HOUR, false);
+
+        final boolean force12HourPicker = getArguments().getBoolean(ARG_FORCE_12_HOUR_PICKER, false);
+        final boolean force24HourPicker = getArguments().getBoolean(ARG_FORCE_24_HOUR_PICKER, false);
 
         mTimePicker = new TimePicker(getActivity());
-        mTimePicker.setIs24HourView(is24Hour);
 
-        String[] divided = ChronoUtil.getTimeFromText(text);
-        int hour = Integer.parseInt(divided[0]);
-        int minute = Integer.parseInt(divided[1]);
+        boolean is24HourView;
+        if (force12HourPicker) {
+            is24HourView = false;
+        } else if (force24HourPicker) {
+            is24HourView = true;
+        } else {
+            is24HourView = DateFormat.is24HourFormat(getContext());
+        }
 
+        mTimePicker.setIs24HourView(is24HourView);
+
+        final Calendar parsed;
+        try {
+            parsed = ChronoUtil.dateToCalendar(ChronoUtil.TIME_FORMATTER.parse(text));
+        } catch (ParseException e) {
+            throw new AssertionError("Time format is always known and parsable", e);
+        }
+
+        int hour = parsed.get(Calendar.HOUR_OF_DAY);
+        int minute = parsed.get(Calendar.MINUTE);
+
+        setHourAndMinute(hour, minute);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onDialogClosed(boolean positiveResult) {
+        if (positiveResult) {
+            String value;
+            Calendar calendar = Calendar.getInstance();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getHour());
+                calendar.set(Calendar.MINUTE, mTimePicker.getMinute());
+            } else {
+                calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
+                calendar.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
+            }
+
+            value = ChronoUtil.TIME_FORMATTER.format(calendar.getTime());
+            if (getTimeDialogPreference().callChangeListener(value)) {
+                getTimeDialogPreference().setSerializedValue(value);
+            }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void setHourAndMinute(int hour, int minute) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             mTimePicker.setHour(hour);
             mTimePicker.setMinute(minute);
@@ -56,34 +109,9 @@ public class TimePreferenceDialogFragment extends PreferenceDialogFragment {
         }
     }
 
-    @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Context context = getActivity();
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-        DialogPreference preference = getPreference();
-        builder.setTitle(preference.getDialogTitle())
-                .setPositiveButton(preference.getPositiveButtonText(), this)
-                .setNegativeButton(preference.getNegativeButtonText(), this)
-                .setView(mTimePicker);
-
-        return builder.create();
-    }
-
-    @Override
-    public void onDialogClosed(boolean positiveResult) {
-        if (positiveResult) {
-            String value;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                value = ChronoUtil.getTimeText(mTimePicker.getHour(), mTimePicker.getMinute());
-            } else {
-                value = ChronoUtil.getTimeText(mTimePicker.getCurrentHour(), mTimePicker.getCurrentMinute());
-            }
-            if (getTimeDialogPreference().callChangeListener(value)) {
-                getTimeDialogPreference().setText(value);
-            }
-        }
+    View getPickerView() {
+        return mTimePicker;
     }
 
     private TimeDialogPreference getTimeDialogPreference() {

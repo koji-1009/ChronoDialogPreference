@@ -1,49 +1,20 @@
 package com.app.dr1009.chronodialogpreference;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
-
 class ChronoUtil {
+    final static SimpleDateFormat TIME_FORMATTER =
+        new SimpleDateFormat("HH:mm", Locale.ROOT);
 
-    static String[] getTimeFromText(@NonNull final String text) {
-        return text.split(":");
-    }
+    final static SimpleDateFormat DATE_FORMATTER =
+        new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
 
-    static String getTimeText(final int hour, final int minute) {
-        return String.format(Locale.US, "%02d:%02d", hour, minute);
-    }
-
-    static String get24TimeText(boolean is24Hour, final int hour, final int minute) {
-        if (is24Hour) {
-            return String.format(Locale.US, "%02d:%02d", hour, minute);
-        } else {
-            if (hour >= 12) {
-                return String.format(Locale.US, "PM %02d:%02d", hour - 12, minute);
-            } else {
-                return String.format(Locale.US, "AM %02d:%02d", hour, minute);
-            }
-        }
-    }
-
-    static String[] getDateFromText(@NonNull final String text) {
-        return text.split("\\.");
-    }
-
-    static Calendar getCalenderFromText(@NonNull final String text) {
-        String[] divided = ChronoUtil.getDateFromText(text);
-        int year = Integer.parseInt(divided[0]);
-        int month = Integer.parseInt(divided[1]) - 1;
-        int dayOfMonth = Integer.parseInt(divided[2]);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, dayOfMonth);
-
+    static Calendar dateToCalendar(Date date) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
         return calendar;
-    }
-
-    static String getDateText(final int year, final int month, final int dayOfMonth) {
-        return String.format(Locale.US, "%04d.%02d.%02d", year, month + 1, dayOfMonth);
     }
 }

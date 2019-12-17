@@ -3,8 +3,13 @@ package com.app.dr1009.chronodialogpreference;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcelable;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.widget.TimePicker;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.preference.DialogPreference;
@@ -12,11 +17,11 @@ import androidx.preference.DialogPreference;
 public class TimeDialogPreference extends DialogPreference {
 
     private static final String DEFAULT_TIME = "00:00";
-
-    private final boolean mIs24Hour;
-    private TimePicker mTimePicker;
-    private int mHour = 0;
-    private int mMinute = 0;
+    private final boolean mIsForce12HourModePicker;
+    private final boolean mIsForce24HourModePicker;
+    private final String mCustomFormat;
+    private final SimpleDateFormat mCustomSimpleDateFormat;
+    private Date mTime;
 
     public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -24,7 +29,15 @@ public class TimeDialogPreference extends DialogPreference {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.Dialog_Preference_TimePicker, 0, 0);
 
-        mIs24Hour = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_is24HourMode, false);
+        mIsForce12HourModePicker = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_force12HourModePicker, false);
+        mIsForce24HourModePicker = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_force24HourModePicker, false);
+
+        mCustomFormat = a.getString(R.styleable.Dialog_Preference_TimePicker_customFormat);
+        if (mCustomFormat != null && !mCustomFormat.isEmpty()) {
+            mCustomSimpleDateFormat = new SimpleDateFormat(mCustomFormat, Locale.getDefault());
+        } else {
+            mCustomSimpleDateFormat = null;
+        }
 
         a.recycle();
     }
@@ -41,27 +54,44 @@ public class TimeDialogPreference extends DialogPreference {
         this(context, null);
     }
 
+    public Date getTime() {
+        return mTime;
+    }
+
+    public boolean isForce12HourPicker() {
+        return mIsForce12HourModePicker;
+    }
+
+    public boolean isForce24HourPicker() {
+        return mIsForce24HourModePicker;
+    }
+
+    public String getCustomFormat() {
+        return mCustomFormat;
+    }
+
     @Override
     public CharSequence getSummary() {
-        return ChronoUtil.get24TimeText(mIs24Hour, mHour, mMinute);
+        if (mCustomSimpleDateFormat != null)
+            return mCustomSimpleDateFormat.format(getTime());
+
+        return DateUtils.formatDateTime(getContext(), getTime().getTime(), DateUtils.FORMAT_SHOW_TIME);
     }
 
-    public boolean is24Hour() {
-        return mIs24Hour;
+    public String getSerializedValue() {
+        return ChronoUtil.TIME_FORMATTER.format(getTime());
     }
 
-    public String getText() {
-        return ChronoUtil.getTimeText(mHour, mMinute);
-    }
-
-    public void setText(@NonNull final String text) {
-        String[] divided = ChronoUtil.getTimeFromText(text);
-        mHour = Integer.parseInt(divided[0]);
-        mMinute = Integer.parseInt(divided[1]);
+    public void setSerializedValue(@NonNull final String serializedTime) {
+        try {
+            mTime = ChronoUtil.TIME_FORMATTER.parse(serializedTime);
+        } catch (ParseException e) {
+            throw new AssertionError(e);
+        }
 
         final boolean wasBlocking = shouldDisableDependents();
 
-        persistString(text);
+        persistString(serializedTime);
 
         final boolean isBlocking = shouldDisableDependents();
         if (isBlocking != wasBlocking) {
@@ -79,9 +109,9 @@ public class TimeDialogPreference extends DialogPreference {
     @Override
     protected void onSetInitialValue(Object defaultValue) {
         if (defaultValue == null) {
-            setText(getPersistedString(DEFAULT_TIME));
+            setSerializedValue(getPersistedString(DEFAULT_TIME));
         } else {
-            setText((String) defaultValue);
+            setSerializedValue((String) defaultValue);
         }
     }
 
@@ -94,7 +124,7 @@ public class TimeDialogPreference extends DialogPreference {
         }
 
         final SavedState myState = new SavedState(superState);
-        myState.text = ChronoUtil.getTimeText(mHour, mMinute);
+        myState.text = DateUtils.formatDateTime(getContext(), mTime.getTime(), DateUtils.FORMAT_SHOW_TIME);
         return myState;
     }
 
@@ -108,6 +138,6 @@ public class TimeDialogPreference extends DialogPreference {
 
         SavedState myState = (SavedState) state;
         super.onRestoreInstanceState(myState.getSuperState());
-        setText(myState.text);
+        setSerializedValue(myState.text);
     }
 }
