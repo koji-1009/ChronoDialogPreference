@@ -1,4 +1,4 @@
-package com.app.dr1009.chronodialogpreference;
+package com.dr1009.app.chronodialogpreference;
 
 import android.app.Dialog;
 import android.content.Context;

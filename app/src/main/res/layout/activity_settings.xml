@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.app.dr1009.chronodialogpreferencedemo.SettingsActivity">
+    tools:context="com.dr1009.app.chronodialogpreferencedemo.SettingsActivity">
 
     <fragment
         android:id="@+id/fragment"
-        android:name="com.app.dr1009.chronodialogpreferencedemo.SettingsFragment"
+        android:name="com.dr1009.app.chronodialogpreferencedemo.SettingsFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

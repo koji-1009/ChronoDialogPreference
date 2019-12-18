@@ -34,7 +34,7 @@ Add `TimeDialogPreference` or `DateDialogPreference` to your preference's xml. S
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.app.dr1009.chronodialogpreference.TimeDialogPreference
+    <com.dr1009.app.chronodialogpreference.TimeDialogPreference
         android:defaultValue="01:10"
         android:key="test1"
         android:title="Time Test"
@@ -42,7 +42,7 @@ Add `TimeDialogPreference` or `DateDialogPreference` to your preference's xml. S
         app:force12HourMode="true"     // (optional) force 12 hour mode (AM/PM) instead of system default
         app:force24HourMode="false" /> // (optional) force 24 hour mode (not AM/PM) instead of system default
 
-    <com.app.dr1009.chronodialogpreference.DateDialogPreference
+    <com.dr1009.app.chronodialogpreference.DateDialogPreference
         android:defaultValue="2000.1.1"
         android:key="test2"
         android:title="Date Test"

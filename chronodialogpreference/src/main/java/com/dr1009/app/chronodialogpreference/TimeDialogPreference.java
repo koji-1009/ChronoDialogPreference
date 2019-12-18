@@ -1,4 +1,4 @@
-package com.app.dr1009.chronodialogpreference;
+package com.dr1009.app.chronodialogpreference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,31 +8,31 @@ import android.util.AttributeSet;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
-public class DateDialogPreference extends DialogPreference {
-    private static final String DEFAULT_DATE = "1970-1-1";
+public class TimeDialogPreference extends DialogPreference {
 
-    private final String mMaxDate;
-    private final String mMinDate;
+    private static final String DEFAULT_TIME = "00:00";
+    private final boolean mIsForce12HourModePicker;
+    private final boolean mIsForce24HourModePicker;
     private final String mCustomFormat;
     private final SimpleDateFormat mCustomSimpleDateFormat;
-    private Calendar mCalendar = Calendar.getInstance();
+    private Date mTime;
 
-    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.Dialog_Preference_DatePicker, defStyleAttr, defStyleRes);
+                R.styleable.Dialog_Preference_TimePicker, 0, 0);
 
-        mMinDate = a.getString(R.styleable.Dialog_Preference_DatePicker_minDate);
-        mMaxDate = a.getString(R.styleable.Dialog_Preference_DatePicker_maxDate);
-        mCustomFormat = a.getString(R.styleable.Dialog_Preference_DatePicker_customFormat);
+        mIsForce12HourModePicker = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_force12HourModePicker, false);
+        mIsForce24HourModePicker = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_force24HourModePicker, false);
+
+        mCustomFormat = a.getString(R.styleable.Dialog_Preference_TimePicker_customFormat);
         if (mCustomFormat != null && !mCustomFormat.isEmpty()) {
             mCustomSimpleDateFormat = new SimpleDateFormat(mCustomFormat, Locale.getDefault());
         } else {
@@ -42,48 +42,56 @@ public class DateDialogPreference extends DialogPreference {
         a.recycle();
     }
 
-    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public DateDialogPreference(Context context, AttributeSet attrs) {
+    public TimeDialogPreference(Context context, AttributeSet attrs) {
         this(context, attrs, androidx.preference.R.attr.dialogPreferenceStyle);
     }
 
-    public DateDialogPreference(Context context) {
+    public TimeDialogPreference(Context context) {
         this(context, null);
     }
 
-    public Calendar getDate() {
-        return mCalendar;
+    public Date getTime() {
+        return mTime;
     }
 
-    public String getMinDate() {
-        return mMinDate;
+    public boolean isForce12HourPicker() {
+        return mIsForce12HourModePicker;
     }
 
-    public String getMaxDate() {
-        return mMaxDate;
+    public boolean isForce24HourPicker() {
+        return mIsForce24HourModePicker;
     }
 
     public String getCustomFormat() {
         return mCustomFormat;
     }
 
-    public String getSerializedValue() {
-        return ChronoUtil.DATE_FORMATTER.format(getDate().getTime());
+    @Override
+    public CharSequence getSummary() {
+        if (mCustomSimpleDateFormat != null)
+            return mCustomSimpleDateFormat.format(getTime());
+
+        return DateUtils.formatDateTime(getContext(), getTime().getTime(), DateUtils.FORMAT_SHOW_TIME);
     }
 
-    public void setSerializedValue(@NonNull final String serializedDate) {
+    public String getSerializedValue() {
+        return ChronoUtil.TIME_FORMATTER.format(getTime());
+    }
+
+    public void setSerializedValue(@NonNull final String serializedTime) {
         try {
-            mCalendar = ChronoUtil.dateToCalendar(ChronoUtil.DATE_FORMATTER.parse(serializedDate));
+            mTime = ChronoUtil.TIME_FORMATTER.parse(serializedTime);
         } catch (ParseException e) {
-            throw new AssertionError("Date format is always known and parsable", e);
+            throw new AssertionError(e);
         }
 
         final boolean wasBlocking = shouldDisableDependents();
 
-        persistString(serializedDate);
+        persistString(serializedTime);
 
         final boolean isBlocking = shouldDisableDependents();
         if (isBlocking != wasBlocking) {
@@ -94,22 +102,14 @@ public class DateDialogPreference extends DialogPreference {
     }
 
     @Override
-    public CharSequence getSummary() {
-        if (mCustomSimpleDateFormat != null)
-            return mCustomSimpleDateFormat.format(getDate().getTime());
-
-        return DateUtils.formatDateTime(getContext(), getDate().getTimeInMillis(), DateUtils.FORMAT_SHOW_DATE);
-    }
-
-    @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
         return a.getString(index);
     }
 
     @Override
-    protected void onSetInitialValue(@Nullable Object defaultValue) {
+    protected void onSetInitialValue(Object defaultValue) {
         if (defaultValue == null) {
-            setSerializedValue(getPersistedString(DEFAULT_DATE));
+            setSerializedValue(getPersistedString(DEFAULT_TIME));
         } else {
             setSerializedValue((String) defaultValue);
         }
@@ -124,7 +124,7 @@ public class DateDialogPreference extends DialogPreference {
         }
 
         final SavedState myState = new SavedState(superState);
-        myState.text = getSerializedValue();
+        myState.text = DateUtils.formatDateTime(getContext(), mTime.getTime(), DateUtils.FORMAT_SHOW_TIME);
         return myState;
     }
 

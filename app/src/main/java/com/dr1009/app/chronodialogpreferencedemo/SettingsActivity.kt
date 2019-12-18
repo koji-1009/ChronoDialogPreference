@@ -1,4 +1,4 @@
-package com.app.dr1009.chronodialogpreferencedemo
+package com.dr1009.app.chronodialogpreferencedemo
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
