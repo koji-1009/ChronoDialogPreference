@@ -1,7 +1,7 @@
-package com.app.dr1009.chronodialogpreferencedemo
+package com.dr1009.app.chronodialogpreferencedemo
 
 import android.os.Bundle
-import com.app.dr1009.chronodialogpreference.ChronoPreferenceFragment
+import com.dr1009.app.chronodialogpreference.ChronoPreferenceFragment
 
 class SettingsFragment : ChronoPreferenceFragment() {
 

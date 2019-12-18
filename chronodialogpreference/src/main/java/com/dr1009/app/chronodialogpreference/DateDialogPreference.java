@@ -1,4 +1,4 @@
-package com.app.dr1009.chronodialogpreference;
+package com.dr1009.app.chronodialogpreference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,31 +8,31 @@ import android.util.AttributeSet;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
-public class TimeDialogPreference extends DialogPreference {
+public class DateDialogPreference extends DialogPreference {
+    private static final String DEFAULT_DATE = "1970-1-1";
 
-    private static final String DEFAULT_TIME = "00:00";
-    private final boolean mIsForce12HourModePicker;
-    private final boolean mIsForce24HourModePicker;
+    private final String mMaxDate;
+    private final String mMinDate;
     private final String mCustomFormat;
     private final SimpleDateFormat mCustomSimpleDateFormat;
-    private Date mTime;
+    private Calendar mCalendar = Calendar.getInstance();
 
-    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.Dialog_Preference_TimePicker, 0, 0);
+                R.styleable.Dialog_Preference_DatePicker, defStyleAttr, defStyleRes);
 
-        mIsForce12HourModePicker = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_force12HourModePicker, false);
-        mIsForce24HourModePicker = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_force24HourModePicker, false);
-
-        mCustomFormat = a.getString(R.styleable.Dialog_Preference_TimePicker_customFormat);
+        mMinDate = a.getString(R.styleable.Dialog_Preference_DatePicker_minDate);
+        mMaxDate = a.getString(R.styleable.Dialog_Preference_DatePicker_maxDate);
+        mCustomFormat = a.getString(R.styleable.Dialog_Preference_DatePicker_customFormat);
         if (mCustomFormat != null && !mCustomFormat.isEmpty()) {
             mCustomSimpleDateFormat = new SimpleDateFormat(mCustomFormat, Locale.getDefault());
         } else {
@@ -42,56 +42,48 @@ public class TimeDialogPreference extends DialogPreference {
         a.recycle();
     }
 
-    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public TimeDialogPreference(Context context, AttributeSet attrs) {
+    public DateDialogPreference(Context context, AttributeSet attrs) {
         this(context, attrs, androidx.preference.R.attr.dialogPreferenceStyle);
     }
 
-    public TimeDialogPreference(Context context) {
+    public DateDialogPreference(Context context) {
         this(context, null);
     }
 
-    public Date getTime() {
-        return mTime;
+    public Calendar getDate() {
+        return mCalendar;
     }
 
-    public boolean isForce12HourPicker() {
-        return mIsForce12HourModePicker;
+    public String getMinDate() {
+        return mMinDate;
     }
 
-    public boolean isForce24HourPicker() {
-        return mIsForce24HourModePicker;
+    public String getMaxDate() {
+        return mMaxDate;
     }
 
     public String getCustomFormat() {
         return mCustomFormat;
     }
 
-    @Override
-    public CharSequence getSummary() {
-        if (mCustomSimpleDateFormat != null)
-            return mCustomSimpleDateFormat.format(getTime());
-
-        return DateUtils.formatDateTime(getContext(), getTime().getTime(), DateUtils.FORMAT_SHOW_TIME);
-    }
-
     public String getSerializedValue() {
-        return ChronoUtil.TIME_FORMATTER.format(getTime());
+        return ChronoUtil.DATE_FORMATTER.format(getDate().getTime());
     }
 
-    public void setSerializedValue(@NonNull final String serializedTime) {
+    public void setSerializedValue(@NonNull final String serializedDate) {
         try {
-            mTime = ChronoUtil.TIME_FORMATTER.parse(serializedTime);
+            mCalendar = ChronoUtil.dateToCalendar(ChronoUtil.DATE_FORMATTER.parse(serializedDate));
         } catch (ParseException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Date format is always known and parsable", e);
         }
 
         final boolean wasBlocking = shouldDisableDependents();
 
-        persistString(serializedTime);
+        persistString(serializedDate);
 
         final boolean isBlocking = shouldDisableDependents();
         if (isBlocking != wasBlocking) {
@@ -102,14 +94,22 @@ public class TimeDialogPreference extends DialogPreference {
     }
 
     @Override
+    public CharSequence getSummary() {
+        if (mCustomSimpleDateFormat != null)
+            return mCustomSimpleDateFormat.format(getDate().getTime());
+
+        return DateUtils.formatDateTime(getContext(), getDate().getTimeInMillis(), DateUtils.FORMAT_SHOW_DATE);
+    }
+
+    @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
         return a.getString(index);
     }
 
     @Override
-    protected void onSetInitialValue(Object defaultValue) {
+    protected void onSetInitialValue(@Nullable Object defaultValue) {
         if (defaultValue == null) {
-            setSerializedValue(getPersistedString(DEFAULT_TIME));
+            setSerializedValue(getPersistedString(DEFAULT_DATE));
         } else {
             setSerializedValue((String) defaultValue);
         }
@@ -124,7 +124,7 @@ public class TimeDialogPreference extends DialogPreference {
         }
 
         final SavedState myState = new SavedState(superState);
-        myState.text = DateUtils.formatDateTime(getContext(), mTime.getTime(), DateUtils.FORMAT_SHOW_TIME);
+        myState.text = getSerializedValue();
         return myState;
     }
 
